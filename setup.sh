@@ -4,7 +4,7 @@ set -e
 
 PROXY_HTTP="http://proxy-wsa.esl.cisco.com:80"
 
-sudo tee /etc/apt/apt.conf.d/95proxies <<EOF
+sudo tee /etc/apt/apt.conf.d/proxy.conf <<EOF
 Acquire::http::Proxy "$PROXY_HTTP";
 EOF
 
