@@ -2,6 +2,12 @@
 
 set -e
 
+PROXY_HTTP="http://proxy-wsa.esl.cisco.com:80"
+
+sudo tee /etc/apt/apt.conf.d/95proxies <<EOF
+Acquire::http::Proxy "$PROXY_HTTP";
+EOF
+
 sudo rm -f /etc/apt/sources.list.d/docker.*
 sudo rm -f /etc/apt/keyrings/docker.*
  
