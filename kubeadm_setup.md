@@ -98,34 +98,41 @@ Kubernetes requires a container runtime. We'll install Docker on all nodes.
  
 ### **Step 3: Install `kubeadm`, `kubelet`, and `kubectl` on all nodes**
  
-1. **Add the Kubernetes apt repository:**
- 
-   On all nodes, run the following commands to add Kubernetes' official repository and install the required tools:
- 
-   ```bash
-   sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-   ```
- 
-   Then add the Kubernetes apt repository:
- 
-   ```bash
-   sudo apt-add-repository "deb https://apt.kubernetes.io/ kubernetes-xenial main"
-   ```
- 
-2. **Install the necessary Kubernetes components:**
- 
-   ```bash
-   sudo apt update
-   sudo apt install -y kubeadm kubelet kubectl
-   ```
- 
-3. **Hold the versions of these packages:**
- 
-   To prevent automatic updates to `kubeadm`, `kubelet`, and `kubectl` that might break the cluster:
- 
-   ```bash
-   sudo apt-mark hold kubeadm kubelet kubectl
-   ```
+These instructions are for Kubernetes v1.35.
+
+Update the apt package index and install packages needed to use the Kubernetes apt repository:
+
+```bash
+sudo apt-get update
+# apt-transport-https may be a dummy package; if so, you can skip that package
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+```
+Download the public signing key for the Kubernetes package repositories. The same signing key is used for all repositories so you can disregard the version in the URL:
+
+```bash
+# If the directory `/etc/apt/keyrings` does not exist, it should be created before the curl command, read the note below.
+# sudo mkdir -p -m 755 /etc/apt/keyrings
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+```
+Note:
+In releases older than Debian 12 and Ubuntu 22.04, directory /etc/apt/keyrings does not exist by default, and it should be created before the curl command.
+Add the appropriate Kubernetes apt repository. Please note that this repository have packages only for Kubernetes 1.35; for other Kubernetes minor versions, you need to change the Kubernetes minor version in the URL to match your desired minor version (you should also check that you are reading the documentation for the version of Kubernetes that you plan to install).
+
+```bash
+# This overwrites any existing configuration in /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+Update the apt package index, install kubelet, kubeadm and kubectl, and pin their version:
+
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+(Optional) Enable the kubelet service before running kubeadm:
+
+```bash
+sudo systemctl enable --now kubelet
+```
  
 4. **Check if `kubeadm` is installed correctly:**
    Run on all nodes:
