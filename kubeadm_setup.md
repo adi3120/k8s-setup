@@ -207,7 +207,15 @@ On the master node (`10.197.226.100`):
 ---
  
 ### **Step 5: Join Worker Nodes to the Cluster**
- 
+
+eg
+
+```bash
+kubeadm join 10.197.226.100:6443 --token knqtpw.t02uinpb645d3jmc \
+	--discovery-token-ca-cert-hash sha256:6ba65e0269b01c0f610ace53ef1eec8de5f67ebe61023547eda19526037cd2eb 
+```
+
+
 1. **Get the join token from the master node:**
  
    After the master node initializes, `kubeadm` will provide you with a command that allows the worker nodes to join the cluster. It looks something like this:
