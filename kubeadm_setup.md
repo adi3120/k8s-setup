@@ -259,12 +259,8 @@ kubeadm join 10.197.226.100:6443 --token knqtpw.t02uinpb645d3jmc \
 ```bash
 cilium install \
   --set proxy.enabled=true \
-  --set extraEnv[0].name=HTTP_PROXY \
-  --set extraEnv[0].value=http://proxy-wsa.esl.cisco.com:80 \
-  --set extraEnv[1].name=HTTPS_PROXY \
-  --set extraEnv[1].value=http://proxy-wsa.esl.cisco.com:80 \
-  --set extraEnv[2].name=NO_PROXY \
-  --set extraEnv[2].value=localhost,127.0.0.1,10.197.226.0/24,10.96.0.0/12
+  --set k8sServiceHost=10.197.226.100 \
+  --set k8sServicePort=6443
 ```
 
 --- 
