@@ -16,6 +16,7 @@ To set up a Kubernetes cluster using `kubeadm` on your Ubuntu 22 VMs, follow the
  
    ```bash
    sudo swapoff -a
+   swapoff -a && sed -i '/ swap / s/^/#/' /etc/fstab
    ```
  
    To make this change permanent, comment out or remove any swap entries from `/etc/fstab` by opening the file and editing:
@@ -144,6 +145,23 @@ sudo systemctl enable --now kubelet
    kubeadm version
    ```
  
+---
+```bash
+sudo nano /etc/systemd/system/containerd.service.d/http-proxy.conf
+
+[Service]
+Environment="HTTP_PROXY=http://proxy-wsa.esl.cisco.com:80"
+Environment="HTTPS_PROXY=http://proxy-wsa.esl.cisco.com:80"
+Environment="NO_PROXY=localhost,127.0.0.1,10.197.226.0/24,10.96.0.0/12,192.168.0.0/16"
+
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+
+sudo systemctl restart containerd
+
+systemctl show containerd | grep -i proxy
+```
+
 ---
  
 ### **Step 4: Set up the Kubernetes Master Node (`10.197.226.100`)**
