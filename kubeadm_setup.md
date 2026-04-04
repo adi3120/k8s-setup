@@ -255,7 +255,19 @@ kubeadm join 10.197.226.100:6443 --token knqtpw.t02uinpb645d3jmc \
    You should see all three nodes listed as `Ready` after a few minutes.
  
 ---
- 
+
+```bash
+cilium install \
+  --set proxy.enabled=true \
+  --set extraEnv[0].name=HTTP_PROXY \
+  --set extraEnv[0].value=http://proxy-wsa.esl.cisco.com:80 \
+  --set extraEnv[1].name=HTTPS_PROXY \
+  --set extraEnv[1].value=http://proxy-wsa.esl.cisco.com:80 \
+  --set extraEnv[2].name=NO_PROXY \
+  --set extraEnv[2].value=localhost,127.0.0.1,10.197.226.0/24,10.96.0.0/12
+```
+
+--- 
 ### **Step 7: Install a Kubernetes Dashboard (Optional)**
  
 If you'd like to set up a Kubernetes Dashboard for managing the cluster, you can install it by running:
