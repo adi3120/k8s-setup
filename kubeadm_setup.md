@@ -261,6 +261,13 @@ cilium install \
   --set proxy.enabled=true \
   --set k8sServiceHost=10.197.226.100 \
   --set k8sServicePort=6443
+
+
+cilium install \
+  --set nodeinit.enabled=true \
+  --set kubeProxyReplacement=strict \
+  --set k8sServiceHost=10.197.226.100 \
+  --set k8sServicePort=6443
 ```
 
 --- 
