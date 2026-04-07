@@ -95,21 +95,23 @@ sudo apt install -y ca-certificates curl gnupg
 ### ====== 6. ADD DOCKER GPG KEY ======
 echo "[+] Adding Docker GPG key via proxy..."
 
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
-
-curl -x $PROXY_HTTP -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-sudo tee /etc/apt/keyrings/docker.asc > /dev/null
-
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 ### ====== 7. ADD DOCKER REPO ======
 echo "[+] Adding Docker repo..."
 
-ARCH=$(dpkg --print-architecture)
-CODENAME=$(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
-
-sudo tee /etc/apt/sources.list.d/docker.list > /dev/null <<EOF
-deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $CODENAME stable
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 
 ### ====== 8. APT UPDATE ======
@@ -132,6 +134,15 @@ sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf > /dev/null <<EOF
 Environment="HTTP_PROXY=$PROXY_HTTP"
 Environment="HTTPS_PROXY=$PROXY_HTTPS"
 Environment="NO_PROXY=$NO_PROXY"
+EOF
+
+sudo tee /etc/docker/daemon.json <<EOF
+{
+  "proxies": {
+    "http-proxy": "$PROXY_HTTP",
+    "https-proxy": "$PROXY_HTTPS"
+  }
+}
 EOF
 
 ### ====== 11. RESTART DOCKER ======
@@ -160,28 +171,30 @@ sudo usermod -aG docker $USER
 
 ## 🔐 Post-Installation Step
 
-After script completes:
-
-```bash
-exec newgrp docker
-```
-
-Or:
-
-```bash
-logout
-```
-
-Then log back in.
+After script completes exit out of the terminal and start the terminal again
 
 ---
 
 ## 🧪 Verification
 
-### Check proxy variables
+### Check proxy variables - these all should have same configs
 
 ```bash
-env | grep -i proxy
+printenv | grep -i proxy
+
+echo $HTTP_PROXY
+echo $HTTPS_PROXY
+echo $http_proxy
+echo $https_proxy
+
+cat /etc/apt/apt.conf.d/95proxies
+```
+
+### These files should not be created, if they are present delete them
+
+```bash
+cat /etc/apt/apt.conf
+cat /etc/apt/apt.conf.d/proxy.conf
 ```
 
 ### Check Docker
@@ -202,48 +215,3 @@ docker run hello-world
 | APT config         | Package manager     |
 | Docker daemon      | Image pulls         |
 
----
-
-### Important Notes
-
-* Use **HTTP proxy even for HTTPS traffic** in most corporate environments
-* Avoid mixing multiple proxy config files unnecessarily
-* Docker requires **daemon-level proxy config**, not just environment variables
-
----
-
-## ❗ Troubleshooting
-
-### APT Debug
-
-```bash
-sudo apt -o Debug::Acquire::https=true update
-```
-
-### Proxy Test
-
-```bash
-curl -x http://proxy.esl.cisco.com:8080 https://google.com -v
-```
-
-### Docker Logs
-
-```bash
-journalctl -u docker -f
-```
-
----
-
-## 🎯 Summary
-
-✔ Proxy configured system-wide
-✔ APT works behind proxy
-✔ Docker installed and proxy-aware
-✔ Ready for Minikube / Kubernetes
-
----
-
-If you want, I can extend this into:
-
-👉 **Kubernetes (kubeadm / minikube) full proxy-aware setup doc**
-👉 **Cisco lab–grade automation playbook (Terraform + Ansible style)**
