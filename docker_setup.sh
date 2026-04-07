@@ -12,37 +12,27 @@ echo " Enterprise Proxy + Docker Setup"
 echo "========================================"
 
 ### ====== 1. GLOBAL PROXY ENV ======
-echo "[+] Setting global proxy environment..."
 
-sudo tee /etc/profile.d/proxy.sh > /dev/null <<EOF
-export http_proxy=$PROXY_HTTP
-export https_proxy=$PROXY_HTTP
-export HTTP_PROXY=$PROXY_HTTP
-export HTTPS_PROXY=$PROXY_HTTP
-export ftp_proxy=$PROXY_HTTP
-export no_proxy=$NO_PROXY
+echo "[+] Setting /etc/environment proxy..."
+
+sudo sed -i '/http_proxy/d;/https_proxy/d;/HTTP_PROXY/d;/HTTPS_PROXY/d;/no_proxy/d' /etc/environment
+
+sudo tee -a /etc/environment > /dev/null <<EOF
+http_proxy=$PROXY_HTTP
+https_proxy=$PROXY_HTTPS
+HTTP_PROXY=$PROXY_HTTP
+HTTPS_PROXY=$PROXY_HTTPS
+no_proxy=$NO_PROXY
 EOF
-
-source /etc/profile.d/proxy.sh
 
 ### ====== 2. APT PROXY CONFIG ======
 echo "[+] Configuring APT proxy..."
 
 sudo tee /etc/apt/apt.conf.d/95proxies > /dev/null <<EOF
 Acquire::http::Proxy "$PROXY_HTTP";
-Acquire::https::Proxy "$PROXY_HTTP";
-Acquire::https::Verify-Peer "false";
-Acquire::https::Verify-Host "false";
+Acquire::https::Proxy "$PROXY_HTTPS";
 EOF
 
-### ====== 3. WGET PROXY ======
-echo "[+] Configuring wget proxy..."
-
-sudo tee /etc/wgetrc > /dev/null <<EOF
-http_proxy = $PROXY_HTTP
-https_proxy = $PROXY_HTTP
-ftp_proxy = $PROXY_HTTP
-EOF
 
 ### ====== 4. CURL TEST ======
 echo "[+] Testing proxy connectivity..."
@@ -55,7 +45,10 @@ curl -x $PROXY_HTTP -I https://download.docker.com || {
 ### ====== 5. REMOVE OLD DOCKER ======
 echo "[+] Removing old Docker packages..."
 
+sudo rm -f /etc/apt/sources.list.d/docker.*
+sudo rm -f /etc/apt/keyrings/docker.*
 sudo apt remove -y docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc || true
+
 
 ### ====== 6. INSTALL DEPENDENCIES ======
 echo "[+] Installing prerequisites..."
@@ -101,7 +94,7 @@ sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf > /dev/null <<EOF
 [Service]
 Environment="HTTP_PROXY=$PROXY_HTTP"
-Environment="HTTPS_PROXY=$PROXY_HTTP"
+Environment="HTTPS_PROXY=$PROXY_HTTPS"
 Environment="NO_PROXY=$NO_PROXY"
 EOF
 
@@ -123,3 +116,7 @@ sudo docker run hello-world || {
 echo "========================================"
 echo "✅ SUCCESS: Docker running behind proxy"
 echo "========================================"
+
+
+
+sudo usermod -aG docker $USER
