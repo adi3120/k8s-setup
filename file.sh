@@ -1,37 +1,9 @@
-# 🐳 Docker Setup Behind Corporate Proxy (Ubuntu)
-
----
-
-## ⚙️ Prerequisites
-
-* Ubuntu (Jammy or compatible)
-* `sudo` access
-* Valid corporate proxy
-
----
-
-## 🚀 Full Setup Script
-
-Copy this whole script given below and then run 
-```bash
-sudo nano docker-setup-with-proxy.sh
-```
-
-and paste this full script and save the file, then run the sh file using the command  
-
-```bash 
-sudo bash docker-setup-with-proxy.sh
-```
-
-### docker-setup-with-proxy.sh script
-
-```bash
 #!/bin/bash
 
 set -e
 
 ### ====== VARIABLES (EDIT THIS) ======
-PROXY_HTTP="http://proxy.esl.cisco.com:8080/"
+PROXY_HTTP=”http://proxy.esl.cisco.com:8080/"
 PROXY_HTTPS="http://proxy.esl.cisco.com:8080/"
 NO_PROXY="localhost,127.0.0.1,.cisco.com"
 
@@ -64,7 +36,7 @@ EOF
 ### ====== 3. CURL TEST ======
 echo "[+] Testing proxy connectivity..."
 
-curl -x $PROXY_HTTP -I https://download.docker.com || {
+curl -x $PROXY_HTTP -I [https://download.docker.com](https://download.docker.com) || {
     echo "❌ Proxy not working. Fix before continuing."
     exit 1
 }
@@ -89,7 +61,7 @@ echo "[+] Adding Docker GPG key via proxy..."
 sudo apt update
 sudo apt install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo curl -fsSL [https://download.docker.com/linux/ubuntu/gpg](https://download.docker.com/linux/ubuntu/gpg) -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 ### ====== 7. ADD DOCKER REPO ======
@@ -97,7 +69,7 @@ echo "[+] Adding Docker repo..."
 
 sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
 Types: deb
-URIs: https://download.docker.com/linux/ubuntu
+URIs: [https://download.docker.com/linux/ubuntu](https://download.docker.com/linux/ubuntu)
 Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
 Components: stable
 Architectures: $(dpkg --print-architecture)
@@ -150,59 +122,8 @@ sudo docker run hello-world || {
     exit 1
 }
 
-
 echo "========================================"
 echo "✅ SUCCESS: Docker running behind proxy"
 echo "========================================"
 
 sudo usermod -aG docker $USER
-```
-
----
-
-## 🔐 Post-Installation Step
-
-After script completes exit out of the terminal and start the terminal again
-
----
-
-## 🧪 Troubleshooting and Verification
-
-### Check proxy variables - these all should have same configs
-
-```bash
-printenv | grep -i proxy
-
-echo $HTTP_PROXY
-echo $HTTPS_PROXY
-echo $http_proxy
-echo $https_proxy
-
-cat /etc/apt/apt.conf.d/95proxies
-```
-
-### These files should not be created, if they are present delete them
-
-```bash
-cat /etc/apt/apt.conf
-cat /etc/apt/apt.conf.d/proxy.conf
-```
-
-### Check Docker
-
-```bash
-docker run hello-world
-```
-
----
-
-## 🧠 Key Concepts
-
-### Proxy Layers
-
-| Layer              | Purpose             |
-| ------------------ | ------------------- |
-| `/etc/environment` | Global system proxy |
-| APT config         | Package manager     |
-| Docker daemon      | Image pulls         |
-

@@ -1,31 +1,3 @@
-# 🐳 Docker Setup Behind Corporate Proxy (Ubuntu)
-
----
-
-## ⚙️ Prerequisites
-
-* Ubuntu (Jammy or compatible)
-* `sudo` access
-* Valid corporate proxy
-
----
-
-## 🚀 Full Setup Script
-
-Copy this whole script given below and then run 
-```bash
-sudo nano docker-setup-with-proxy.sh
-```
-
-and paste this full script and save the file, then run the sh file using the command  
-
-```bash 
-sudo bash docker-setup-with-proxy.sh
-```
-
-### docker-setup-with-proxy.sh script
-
-```bash
 #!/bin/bash
 
 set -e
@@ -150,59 +122,8 @@ sudo docker run hello-world || {
     exit 1
 }
 
-
 echo "========================================"
 echo "✅ SUCCESS: Docker running behind proxy"
 echo "========================================"
 
 sudo usermod -aG docker $USER
-```
-
----
-
-## 🔐 Post-Installation Step
-
-After script completes exit out of the terminal and start the terminal again
-
----
-
-## 🧪 Troubleshooting and Verification
-
-### Check proxy variables - these all should have same configs
-
-```bash
-printenv | grep -i proxy
-
-echo $HTTP_PROXY
-echo $HTTPS_PROXY
-echo $http_proxy
-echo $https_proxy
-
-cat /etc/apt/apt.conf.d/95proxies
-```
-
-### These files should not be created, if they are present delete them
-
-```bash
-cat /etc/apt/apt.conf
-cat /etc/apt/apt.conf.d/proxy.conf
-```
-
-### Check Docker
-
-```bash
-docker run hello-world
-```
-
----
-
-## 🧠 Key Concepts
-
-### Proxy Layers
-
-| Layer              | Purpose             |
-| ------------------ | ------------------- |
-| `/etc/environment` | Global system proxy |
-| APT config         | Package manager     |
-| Docker daemon      | Image pulls         |
-
