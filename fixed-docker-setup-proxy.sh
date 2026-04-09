@@ -33,7 +33,13 @@ Acquire::http::Proxy "$PROXY_HTTP";
 Acquire::https::Proxy "$PROXY_HTTPS";
 EOF
 
-### ====== 3. CURL TEST ======
+### ====== 3. CURL ======
+
+### ====== 3.1. CURL INSTALL ======
+sudo apt update
+sudo apt install -y curl
+
+### ====== 3.1. CURL TEST ======
 echo "[+] Testing proxy connectivity..."
 
 curl -x $PROXY_HTTP -I https://download.docker.com || {
@@ -86,6 +92,9 @@ echo "[+] Installing Docker..."
 
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+
+sudo usermod -aG docker $USER && newgrp docker
+
 ### ====== 10. DOCKER PROXY CONFIG ======
 echo "[+] Configuring Docker daemon proxy..."
 
@@ -114,7 +123,6 @@ sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 
-sudo usermod -aG docker $USER && newgrp docker
 
 ### ====== 12. VERIFY ======
 echo "[+] Testing Docker..."
@@ -127,4 +135,3 @@ sudo docker run hello-world || {
 echo "========================================"
 echo "✅ SUCCESS: Docker running behind proxy"
 echo "========================================"
-
